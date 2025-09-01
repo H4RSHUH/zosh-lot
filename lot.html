@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Lottery Winners Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,215,0,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .winner-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .amount {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 10px;
+            width: 0%;
+            animation: loading 3s ease-out forwards;
+        }
+
+        @keyframes loading {
+            to { width: 100%; }
+        }
+
+        .prank-reveal {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin: 10px 0;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page 1: Initial Winner Notification -->
+        <div class="page active" id="page1">
+            <div class="logo">🎰 MEGA LOTTERY 🎰</div>
+            <div class="winner-badge">🎉 WINNER ALERT 🎉</div>
+            <h1>Congratulations!</h1>
+            <p style="font-size: 1.2em; margin: 20px 0; color: #555;">
+                Your ticket number <strong>ML-2024-789456</strong> has been selected!
+            </p>
+            <div class="amount">$1,000,000</div>
+            <p style="color: #666;">You have won ONE MILLION DOLLARS!</p>
+            <button class="btn" onclick="nextPage()">Claim My Prize!</button>
+        </div>
+
+        <!-- Page 2: Verification -->
+        <div class="page" id="page2">
+            <div class="logo">🔍 VERIFICATION 🔍</div>
+            <h2>Verifying Your Identity...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p style="margin: 20px 0; color: #555;">
+                Please wait while we verify your winning ticket...
+            </p>
+            <div class="timer" id="timer">Verification Time: <span id="countdown">5</span>s</div>
+        </div>
+
+        <!-- Page 3: Prize Selection -->
+        <div class="page" id="page3">
+            <div class="logo">🎁 PRIZE SELECTION 🎁</div>
+            <h2>Choose Your Prize Format:</h2>
+            <p style="margin: 20px 0; color: #555;">
+                How would you like to receive your $1,000,000?
+            </p>
+            <button class="btn" onclick="nextPage()">💰 Lump Sum ($1,000,000)</button>
+            <button class="btn" onclick="nextPage()">📅 Annual Payments ($50,000/year)</button>
+        </div>
+
+        <!-- Page 4: Personal Details -->
+        <div class="page" id="page4">
+            <div class="logo">📋 WINNER REGISTRATION 📋</div>
+            <h2>Final Step - Winner Registration</h2>
+            <p style="margin: 20px 0; color: #555;">
+                Just a few more details to process your million dollar prize...
+            </p>
+            <div style="text-align: left; margin: 20px 0;">
+                <input type="text" placeholder="Full Name" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
+                <input type="email" placeholder="Email Address" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
+                <input type="tel" placeholder="Phone Number" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
+            </div>
+            <button class="btn" onclick="nextPage()">Submit & Claim Prize!</button>
+        </div>
+
+        <!-- Page 5: Processing -->
+        <div class="page" id="page5">
+            <div class="logo">⚡ PROCESSING ⚡</div>
+            <h2>Processing Your Claim...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p style="margin: 20px 0; color: #555;">
+                Contacting the lottery commission...<br>
+                Preparing your million dollar transfer...<br>
+                Almost ready to make you rich!
+            </p>
+            <div class="timer">Processing Time: <span id="countdown2">8</span>s</div>
+        </div>
+
+        <!-- Page 6: Prank Reveal -->
+        <div class="page" id="page6">
+            <div class="prank-reveal">
+                <div class="emoji">😂</div>
+                <h1 style="color: #e74c3c;">GOTCHA!</h1>
+                <div class="emoji">🎭</div>
+                <h2>This was all a prank!</h2>
+                <p style="font-size: 1.2em; margin: 20px 0;">
+                    Sorry friend, but you haven't actually won a million dollars... 
+                    <br><br>
+                    But you did win something even better - 
+                    <strong>a good laugh and a memorable prank!</strong>
+                </p>
+                <div class="emoji">❤️</div>
+                <p style="font-style: italic; color: #666;">
+                    Hope you enjoyed the ride! Your friend thought this would give you a good giggle. 😄
+                </p>
+                <button class="btn" onclick="restartPrank()" style="background: linear-gradient(45deg, #ff9a9e, #fecfef); color: #333;">
+                    Play Again? 🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 6;
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                document.getElementById(`page${currentPage}`).classList.remove('active');
+                currentPage++;
+                document.getElementById(`page${currentPage}`).classList.add('active');
+                
+                // Special handling for pages with timers
+                if (currentPage === 2) {
+                    startCountdown('countdown', 5, nextPage);
+                } else if (currentPage === 5) {
+                    startCountdown('countdown2', 8, nextPage);
+                }
+            }
+        }
+
+        function startCountdown(elementId, seconds, callback) {
+            let timeLeft = seconds;
+            const element = document.getElementById(elementId);
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                element.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    setTimeout(callback, 500);
+                }
+            }, 1000);
+        }
+
+        function restartPrank() {
+            currentPage = 1;
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page1').classList.add('active');
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, Math.random() * 1000);
+            }
+        }
+
+        // Start confetti when page loads
+        createConfetti();
+        setInterval(createConfetti, 5000);
+    </script>
+</body>
+</html>
